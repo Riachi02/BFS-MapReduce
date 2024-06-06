@@ -126,9 +126,7 @@ def main():
         new_nodes.append(nodes)
 
     ray.init()
-    blacks = 0
     while True:
-        blacks = 0
         map_results, futures = [], []
         shuffled_nodes = {}
 
