@@ -1,52 +1,34 @@
 from queue import Queue
 from Graph import *
+from Node import *
 import sys
-from pprint import pprint
 import time
 
-class Node:
+start_time = time.time()
+path = sys.argv[1]
+graph_obj = Graph(path) # Creazione dell'oggetto grafo
+graph = graph_obj.get_graph() # Restituisce il grafo come dizionario
 
-    def __init__(self, id, source):
-        self.id = id
-        if self.id == source:
-            self.color = 'GRAY'
-            self.dist = 0
-        else:
-            self.color = 'WHITE'
-            self.dist = float('inf')
-        self.neighbours = []
-        self.path_list = []
+nodes = {}
+source = 0 # Nodo sorgente
+for node in graph:
+    nodes[node] = Node(node, source) # Creazione della lista di oggetti nodi
 
-def main():
-    start_time = time.time()
-    path = sys.argv[1]
-    graph_obj = Graph(path)
-    graph = graph_obj.get_graph()
+queue = Queue(maxsize = len(graph))
+queue.put(source) 
 
-    nodes = {}
-    source = 0
-    for node in graph:
-        nodes[node] = Node(node, source)
+while not queue.empty(): # Il ciclo si interrompe quando la coda risulta essere vuota
+    parent = queue.get()
+    for child in graph[parent]: # Itera la lista di adiacenza del nodo
+        if nodes[child].color == "WHITE": 
+            nodes[child].color = "GRAY" # Aggiornamento delle caratteristiche dei vicini del nodo
+            nodes[child].dist = nodes[parent].dist + 1 
+            nodes[child].path_list.append(parent)
+            nodes[child].path_list.extend(nodes[parent].path_list)
+            queue.put(child)
+    nodes[parent].color = "BLACK" # Aggiornamento dello stato del nodo ad "esplorato"
 
-    queue = Queue(maxsize = len(graph))
-    queue.put(source)
+end_time = time.time()
 
-    while not queue.empty():
-        parent = queue.get()
-        for child in graph[parent]:
-            if nodes[child].color == "WHITE":
-                nodes[child].color = "GRAY"
-                nodes[child].dist = nodes[parent].dist + 1
-                nodes[child].path_list.append(parent)
-                nodes[child].path_list.extend(nodes[parent].path_list)
-                queue.put(child)
-        nodes[parent].color = "BLACK"
+print("Total execution time: ", end_time - start_time)
     
-    end_time = time.time()
-    for id, node in nodes.items():
-        print(f"Node {id}, Color: {node.color}, Dist: {node.dist}, Path List: {node.path_list}")
-
-    print("Total execution time: ", end_time - start_time)
-    
-if __name__ == "__main__":
-    main()
